@@ -22,7 +22,7 @@ const Index = () => {
               <Sparkles size={16} className="text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-sm font-bold text-foreground tracking-tight">InfographX</h1>
+              <h1 className="text-sm font-bold text-foreground tracking-tight">VIZZY</h1>
               <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
                 Criador de Infográficos
               </p>
