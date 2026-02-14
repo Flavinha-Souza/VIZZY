@@ -11,15 +11,28 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+
+      {/* Shadcn Toast (caso use em outros lugares) */}
       <Toaster />
-      <Sonner />
+
+      {/* Sonner Global Toast */}
+      <Sonner
+        position="top-center"
+        richColors
+        closeButton
+        toastOptions={{
+          duration: 2500,
+          className: "font-mono text-xs",
+        }}
+    />
+
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
+
     </TooltipProvider>
   </QueryClientProvider>
 );
