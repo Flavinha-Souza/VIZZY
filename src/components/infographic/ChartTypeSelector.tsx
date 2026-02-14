@@ -17,9 +17,16 @@ const chartTypes: { id: ChartType; icon: any; label: string }[] = [
 const ChartTypeSelector = ({ selected, onSelect }: ChartTypeSelectorProps) => {
   return (
     <div>
-      <label className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-2 block">
-        Tipo de Gráfico
-      </label>
+      <div className="mb-3">
+        <span className="block text-[10px] md:text-xs font-mono uppercase tracking-[0.2em] text-primary/75">
+          Configuração
+        </span>
+        <h3 className="mt-1 text-sm md:text-base font-semibold tracking-tight text-foreground">
+          Tipo de Gráfico
+        </h3>
+        <div className="mt-2 h-px bg-gradient-to-r from-primary/45 via-primary/20 to-transparent" />
+      </div>
+
       <div className="grid grid-cols-2 gap-2">
         {chartTypes.map((type) => {
           const isActive = selected === type.id;
@@ -53,3 +60,4 @@ const ChartTypeSelector = ({ selected, onSelect }: ChartTypeSelectorProps) => {
 };
 
 export default ChartTypeSelector;
+
