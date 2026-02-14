@@ -18,6 +18,6 @@ export default defineConfig(() => ({
     },
   },
   build: {
-    charset: 'utf8',
+    charset: "utf8",
   },
 }));

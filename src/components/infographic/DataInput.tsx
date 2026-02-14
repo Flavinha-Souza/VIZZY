@@ -83,10 +83,21 @@ const DataInput = ({ data, onDataChange, title, onTitleChange }: DataInputProps)
     <div className="space-y-4">
       {/* Title */}
       <div>
-        <label className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-1.5 block">
-          Título do Infográfico
-        </label>
+        <div className="mb-2">
+          <span className="block text-[10px] md:text-xs font-mono uppercase tracking-[0.2em] text-primary/75">
+            Conteúdo
+          </span>
+          <label
+            htmlFor="infographic-title"
+            className="mt-1 block text-sm md:text-base font-semibold tracking-tight text-foreground"
+          >
+            Título do Infográfico
+          </label>
+          <div className="mt-2 h-px bg-gradient-to-r from-primary/45 via-primary/20 to-transparent" />
+        </div>
+
         <input
+          id="infographic-title"
           type="text"
           value={title}
           onChange={(e) => onTitleChange(e.target.value)}
@@ -227,3 +238,5 @@ const DataInput = ({ data, onDataChange, title, onTitleChange }: DataInputProps)
 };
 
 export default DataInput;
+
+
