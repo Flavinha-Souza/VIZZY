@@ -18,8 +18,12 @@ const Index = () => {
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/70 border-b border-border/50">
         <div className="flex items-center justify-between px-4 md:px-6 h-14">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
-              <Sparkles size={16} className="text-primary-foreground" />
+            <div className="w-8 h-8 flex items-center justify-center">
+              <img
+                src="/Logo azul 2.png"
+                alt="Vizzy Logo"
+                className="h-8 w-auto object-contain"
+              />
             </div>
             <div>
               <h1 className="text-sm font-bold text-foreground tracking-tight">VIZZY</h1>
