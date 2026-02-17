@@ -107,7 +107,7 @@ npm install
 npm run dev
 
 
-📜 Scripts
+## 📜 Scripts
 npm run dev → ambiente de desenvolvimento
 npm run build → build de produção
 npm run preview → preview do build
@@ -115,7 +115,7 @@ npm run lint → análise de código
 npm run test → testes
 
 
-🎯 Objetivo do Projeto
+## 🎯 Objetivo do Projeto
 O Vizzy foi desenvolvido como projeto de portfólio para demonstrar:
 Organização de código em aplicações React
 Manipulação e visualização de dados
@@ -124,13 +124,13 @@ Feature gating no front-end
 Atenção a detalhes de UX e design
 
 
-🔮 Próximos Passos (Possíveis Evoluções)
+## 🔮 Próximos Passos (Possíveis Evoluções)
 Integração com backend
 Compartilhamento por link
 Templates de infográficos
 Exportação com múltiplos formatos e qualidade ajustável
 
 
-📄 Licença
+## 📄 Licença
 
 MIT
