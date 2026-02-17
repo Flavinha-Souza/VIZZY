@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Trash2 } from 'lucide-react';
-import { toast } from 'sonner';
-import { ChartType, DataRow } from '@/types/infographic';
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { ChartType, DataRow } from "@/types/infographic";
 
 interface SavedItem {
   id: number;
@@ -23,7 +23,7 @@ const SavedInfographicsModal = ({ open, onClose, onSelect }: Props) => {
 
   useEffect(() => {
     if (open) {
-      const data = JSON.parse(localStorage.getItem('vizzy_saved') || '[]');
+      const data = JSON.parse(localStorage.getItem("vizzy_saved") || "[]");
       setSaved(data.reverse());
     }
   }, [open]);
@@ -31,23 +31,23 @@ const SavedInfographicsModal = ({ open, onClose, onSelect }: Props) => {
   const deleteItem = (id: number) => {
     const updated = saved.filter((item) => item.id !== id);
     setSaved(updated);
-    localStorage.setItem('vizzy_saved', JSON.stringify(updated));
+    localStorage.setItem("vizzy_saved", JSON.stringify(updated));
 
-    toast.success('Infográfico removido', {
+    toast.success("Infográfico removido", {
       duration: 2000,
     });
   };
 
   const getChartLabel = (type: ChartType) => {
     switch (type) {
-      case 'bar':
-        return 'Gráfico de Barras';
-      case 'line':
-        return 'Gráfico de Linha';
-      case 'pie':
-        return 'Gráfico de Pizza';
-      case 'progress':
-        return 'Gráfico de Progresso';
+      case "bar":
+        return "Gráfico de Barras";
+      case "line":
+        return "Gráfico de Linha";
+      case "pie":
+        return "Gráfico de Pizza";
+      case "progress":
+        return "Gráfico de Progresso";
       default:
         return type;
     }
@@ -69,7 +69,7 @@ const SavedInfographicsModal = ({ open, onClose, onSelect }: Props) => {
             initial={{ opacity: 0, scale: 0.97, y: 40 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.97, y: 40 }}
-            transition={{ type: 'spring', stiffness: 260, damping: 25 }}
+            transition={{ type: "spring", stiffness: 260, damping: 25 }}
             className="fixed z-50 inset-0 md:inset-20 bg-background md:rounded-xl shadow-2xl flex flex-col"
           >
             {/* Header */}
@@ -88,7 +88,6 @@ const SavedInfographicsModal = ({ open, onClose, onSelect }: Props) => {
 
             {/* Conteúdo */}
             <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-3">
-
               {saved.length === 0 && (
                 <div className="text-center text-muted-foreground text-sm mt-10">
                   Você ainda não salvou nenhum infográfico.
@@ -113,7 +112,7 @@ const SavedInfographicsModal = ({ open, onClose, onSelect }: Props) => {
                     </h3>
 
                     <span className="text-xs text-muted-foreground">
-                      {getChartLabel(item.chartType)} •{' '}
+                      {getChartLabel(item.chartType)} •{" "}
                       {new Date(item.createdAt).toLocaleDateString()}
                     </span>
                   </div>
