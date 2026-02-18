@@ -1,9 +1,13 @@
-﻿<p align="center">
+
+---
+
+ <p align="center">
   <img src="public/banner.png" alt="Vizzy Banner" width="800" />
 </p>
 
+---
 
-Aplicação web para criação de infográficos interativos, com edição em tempo real, foco em experiência visual e fluxo de uso simples.
+Aplicação web para criação de infográficos interativos, com edição em tempo real, foco em experiência visual, usabilidade e fluxo intuitivo.
 
 ## 🚀 Funcionalidades
 
