@@ -13,6 +13,14 @@ export interface InfographicState {
   colors: string[];
 }
 
+export interface SavedInfographic {
+  id: number;
+  title: string;
+  chartType: ChartType;
+  data: DataRow[];
+  createdAt: string;
+}
+
 export const DEFAULT_COLORS = [
   'hsl(187, 94%, 43%)',
   'hsl(270, 60%, 58%)',

@@ -1,37 +1,30 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { ChartType, DataRow } from "@/types/infographic";
-
-interface SavedItem {
-  id: number;
-  title: string;
-  chartType: ChartType;
-  data: DataRow[];
-  createdAt: string;
-}
+import { getSavedInfographics, saveSavedInfographics } from "@/lib/storage";
+import { ChartType, SavedInfographic } from "@/types/infographic";
 
 interface Props {
   open: boolean;
   onClose: () => void;
-  onSelect: (item: SavedItem) => void;
+  onSelect: (item: SavedInfographic) => void;
 }
 
 const SavedInfographicsModal = ({ open, onClose, onSelect }: Props) => {
-  const [saved, setSaved] = useState<SavedItem[]>([]);
+  const [saved, setSaved] = useState<SavedInfographic[]>([]);
 
   useEffect(() => {
     if (open) {
-      const data = JSON.parse(localStorage.getItem("vizzy_saved") || "[]");
-      setSaved(data.reverse());
+      const data = getSavedInfographics();
+      setSaved([...data].reverse());
     }
   }, [open]);
 
   const deleteItem = (id: number) => {
     const updated = saved.filter((item) => item.id !== id);
     setSaved(updated);
-    localStorage.setItem("vizzy_saved", JSON.stringify(updated));
+    saveSavedInfographics(updated);
 
     toast.success("Infográfico removido", {
       duration: 2000,
@@ -72,7 +65,6 @@ const SavedInfographicsModal = ({ open, onClose, onSelect }: Props) => {
             transition={{ type: "spring", stiffness: 260, damping: 25 }}
             className="fixed z-50 inset-0 md:inset-20 bg-background md:rounded-xl shadow-2xl flex flex-col"
           >
-            {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-border">
               <h2 className="text-sm font-mono uppercase tracking-wider text-muted-foreground">
                 Meus Infográficos
@@ -86,7 +78,6 @@ const SavedInfographicsModal = ({ open, onClose, onSelect }: Props) => {
               </button>
             </div>
 
-            {/* Conteúdo */}
             <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-3">
               {saved.length === 0 && (
                 <div className="text-center text-muted-foreground text-sm mt-10">
@@ -105,19 +96,14 @@ const SavedInfographicsModal = ({ open, onClose, onSelect }: Props) => {
                     onClose();
                   }}
                 >
-                  {/* Infos */}
                   <div className="flex flex-col">
-                    <h3 className="text-sm font-semibold text-foreground">
-                      {item.title}
-                    </h3>
+                    <h3 className="text-sm font-semibold text-foreground">{item.title}</h3>
 
                     <span className="text-xs text-muted-foreground">
-                      {getChartLabel(item.chartType)} •{" "}
-                      {new Date(item.createdAt).toLocaleDateString()}
+                      {getChartLabel(item.chartType)} • {new Date(item.createdAt).toLocaleDateString()}
                     </span>
                   </div>
 
-                  {/* Delete */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();

@@ -1,72 +1,18 @@
-# Vizzy
+﻿# Vizzy
 
-Criador de infográficos interativo para web, focado em experiência visual, responsividade e refinamento de UI.
-
-Projeto desenvolvido como vitrine de front-end moderno, explorando visualização de dados, microinterações e organização de código.
-
----
-
-## ✨ Visão Geral
-
-O Vizzy transforma dados simples em gráficos visuais de forma rápida e intuitiva.
-
-O usuário pode:
-
-- Criar gráficos em tempo real
-- Editar dados dinamicamente
-- Alternar entre múltiplos tipos de visualização
-- Salvar projetos localmente
-- Exportar o resultado como imagem
-
-O foco principal do projeto é **UX refinada + estrutura front-end bem organizada**.
-
----
+Aplicação web para criação de infográficos interativos, com edição em tempo real, foco em experiência visual e fluxo de uso simples.
 
 ## 🚀 Funcionalidades
 
-### 📊 Visualização de Dados
-- Gráfico de Barras
-- Gráfico de Linha
-- Gráfico de Pizza
-- Barras de Progresso
+- Criação e edição de gráficos em tempo real
+- Tipos de gráfico: barras, linha, pizza e progresso
+- Entrada de dados por formulário, JSON e CSV
+- Salvamento local de infográficos
+- Exportação de gráfico (com controle de acesso)
+- Área de conta com edição de perfil, logout e exclusão de conta
+- Fluxo de autenticação com login, cadastro e redefinição de senha local
 
-### 📝 Entrada de Dados
-- Formulário manual
-- JSON
-- CSV
-
-### 💾 Persistência
-- Salvamento via `localStorage`
-- Sessão persistida em `vizzy_current_user`
-
-### 🔐 Sistema de Conta (Front-end only)
-- Modal de login/cadastro
-- Edição de nome e email
-- Logout
-- Exclusão de conta
-
-### 🚪 Regras de Acesso
-- Editor livre (sem login)
-- Salvar livre
-- "Meus Infográficos" exige login
-- Exportar PNG exige login
-
----
-
-## 🎨 Foco em UX
-
-O projeto prioriza:
-
-- Responsividade real (mobile-first refinado)
-- Microinterações com Framer Motion
-- Tooltip customizado com melhor contraste
-- Destaque visual em elementos ativos
-- Ajustes de labels e layout para telas menores
-- Experiência consistente entre estados
-
----
-
-## 🛠 Stack
+## 🧩 Tecnologias
 
 - React 18
 - TypeScript
@@ -75,62 +21,75 @@ O projeto prioriza:
 - Recharts
 - Framer Motion
 - Sonner (toasts)
-- Radix UI (Tooltip)
+- Vitest + Testing Library
 
----
+## 🎨 Design e Experiência
 
-## 🧱 Arquitetura
+- Interface dark com foco em legibilidade
+- Modal de autenticação responsivo (mobile e desktop)
+- Animações suaves de transição entre login, cadastro e redefinição
+- Feedback visual de validação de campos e estados de erro
 
-Estrutura organizada por domínio:
+## 🔐 Autenticação e Controle de Acesso
 
-src/ 
-components/ 
-infographic/ 
-auth/ 
-ui/ 
-pages/ 
-hooks/ 
-lib/ 
-types/
+- Autenticação local via `localStorage`
+- Senhas armazenadas com hash (com compatibilidade para dados legados)
+- Regras atuais:
+  - `Salvar`: livre (sem login)
+  - `Meus Infográficos`: exige login
+  - `Exportar PNG`: exige login
 
-Separação clara entre:
-- Visualização de gráficos
-- Autenticação
-- Componentes de UI reutilizáveis
-- Tipagens e utilitários
+## 🧠 Aprendizado
 
+Este projeto consolidou prática em:
 
-## 💻 Como rodar localmente
+- Componentização com React + TypeScript
+- Modelagem de estado e fluxos de UI
+- Responsividade com Tailwind CSS
+- Animações com Framer Motion
+- Controle de acesso no front-end
+
+## 📋 Pré-requisitos (para rodar o projeto)
+
+- Node.js 18+ (recomendado)
+- npm 9+ (ou compatível)
+
+## 🔧 Instalação
 
 ```bash
 npm install
 npm run dev
+```
 
+Aplicação disponível em:
 
-## 📜 Scripts
-npm run dev → ambiente de desenvolvimento
-npm run build → build de produção
-npm run preview → preview do build
-npm run lint → análise de código
-npm run test → testes
+`http://localhost:8080`
 
+## 📁 Estrutura do Projeto
 
-## 🎯 Objetivo do Projeto
-O Vizzy foi desenvolvido como projeto de portfólio para demonstrar:
-Organização de código em aplicações React
-Manipulação e visualização de dados
-Controle de estado e persistência
-Feature gating no front-end
-Atenção a detalhes de UX e design
+- `src/pages/Index.tsx`: tela principal e fluxo central do app
+- `src/components/infographic/*`: entrada de dados, seleção de gráfico e preview
+- `src/components/auth/*`: login, cadastro, redefinição e conta
+- `src/components/ui/*`: componentes utilitários de interface
+- `src/types/infographic.ts`: tipagens de domínio do infográfico
 
+## 📝 Scripts Disponíveis
 
-## 🔮 Próximos Passos (Possíveis Evoluções)
-Integração com backend
-Compartilhamento por link
-Templates de infográficos
-Exportação com múltiplos formatos e qualidade ajustável
-
+- `npm run dev`: inicia ambiente de desenvolvimento
+- `npm run build`: gera build de produção
+- `npm run build:dev`: gera build no modo development
+- `npm run preview`: serve o build localmente
+- `npm run lint`: executa lint
+- `npm run test`: executa testes uma vez
+- `npm run test:watch`: executa testes em modo watch
 
 ## 📄 Licença
 
-MIT
+Este projeto está sob a licença MIT.  
+Veja o arquivo `LICENSE`.
+
+## 👩‍💻 Autora
+
+Desenvolvido por Flávia Souza – Desenvolvedora Front-end Web e Mobile
+
+⭐ Se este projeto te ajudou ou te inspirou, considere dar uma estrela no GitHub!

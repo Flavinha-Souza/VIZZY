@@ -7,13 +7,10 @@ import ChartPreview from '@/components/infographic/ChartPreview';
 import SavedInfographicsModal from '@/components/infographic/SavedInfographicsModal';
 import AuthModal from '@/components/auth/AuthModal';
 import AccountModal from '@/components/auth/AccountModal';
-import { ChartType, DataRow, SAMPLE_DATA } from '@/types/infographic';
+import { getSavedInfographics, getSession, saveSavedInfographics } from '@/lib/storage';
+import { AuthSession } from '@/types/auth';
+import { ChartType, DataRow, SAMPLE_DATA, SavedInfographic } from '@/types/infographic';
 import { toast } from 'sonner';
-
-interface AuthSession {
-  name: string;
-  email: string;
-}
 
 const Index = () => {
   const [data, setData] = useState<DataRow[]>(SAMPLE_DATA);
@@ -23,18 +20,12 @@ const Index = () => {
   const [savedOpen, setSavedOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
-  const [session, setSession] = useState<AuthSession | null>(() => {
-    try {
-      return JSON.parse(localStorage.getItem('vizzy_current_user') || 'null');
-    } catch {
-      return null;
-    }
-  });
+  const [session, setSession] = useState<AuthSession | null>(() => getSession());
 
   const saveInfographic = () => {
-    const saved = JSON.parse(localStorage.getItem('vizzy_saved') || '[]');
+    const saved = getSavedInfographics();
 
-    const newItem = {
+    const newItem: SavedInfographic = {
       id: Date.now(),
       title,
       chartType,
@@ -42,9 +33,9 @@ const Index = () => {
       createdAt: new Date().toISOString(),
     };
 
-    localStorage.setItem('vizzy_saved', JSON.stringify([...saved, newItem]));
+    saveSavedInfographics([...saved, newItem]);
 
-    toast.success('Infogr\u00E1fico salvo com sucesso');
+    toast.success('Infográfico salvo com sucesso');
   };
 
   const openSavedProjects = () => {
@@ -235,5 +226,3 @@ const Index = () => {
 };
 
 export default Index;
-
-

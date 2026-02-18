@@ -1,18 +1,9 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Trash2, LogOut, X } from "lucide-react";
 import { toast } from "sonner";
-
-interface AuthUser {
-  name: string;
-  email: string;
-  password: string;
-}
-
-interface AuthSession {
-  name: string;
-  email: string;
-}
+import { clearSession, getUsers, saveSession, saveUsers } from "@/lib/storage";
+import { AuthSession } from "@/types/auth";
 
 interface AccountModalProps {
   open: boolean;
@@ -20,17 +11,6 @@ interface AccountModalProps {
   onClose: () => void;
   onSessionChange: (session: AuthSession | null) => void;
 }
-
-const USERS_KEY = "vizzy_users";
-const SESSION_KEY = "vizzy_current_user";
-
-const getUsers = (): AuthUser[] => {
-  try {
-    return JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
-  } catch {
-    return [];
-  }
-};
 
 const AccountModal = ({
   open,
@@ -74,10 +54,10 @@ const AccountModal = ({
         : user,
     );
 
-    localStorage.setItem(USERS_KEY, JSON.stringify(updatedUsers));
+    saveUsers(updatedUsers);
 
     const nextSession: AuthSession = { name: trimmedName, email: normalizedEmail };
-    localStorage.setItem(SESSION_KEY, JSON.stringify(nextSession));
+    saveSession(nextSession);
     onSessionChange(nextSession);
 
     toast.success("Perfil atualizado.");
@@ -85,7 +65,7 @@ const AccountModal = ({
   };
 
   const handleLogout = () => {
-    localStorage.removeItem(SESSION_KEY);
+    clearSession();
     onSessionChange(null);
     toast.success("Você saiu da conta.");
     onClose();
@@ -97,8 +77,8 @@ const AccountModal = ({
     if (!confirmed) return;
 
     const users = getUsers().filter((user) => user.email !== session.email);
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
-    localStorage.removeItem(SESSION_KEY);
+    saveUsers(users);
+    clearSession();
     onSessionChange(null);
 
     toast.success("Conta excluída.");
