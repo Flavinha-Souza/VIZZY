@@ -2,7 +2,6 @@
   <img src="public/banner.png" alt="Vizzy Banner" />
 </p>
 
-# Vizzy
 
 Aplicação web para criação de infográficos interativos, com edição em tempo real, foco em experiência visual e fluxo de uso simples.
 
