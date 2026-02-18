@@ -1,5 +1,5 @@
 ﻿<p align="center">
-  <img src="public/banner.png" alt="Vizzy Banner" />
+  <img src="public/banner.png" alt="Vizzy Banner" width="800" />
 </p>
 
 
