@@ -33,13 +33,13 @@ Aplicação web para criação de infográficos interativos, com edição em tem
 ## 📸 Screenshots
 
 ### Tela principal
-![Tela principal](public/Tela%20principal.jpeg)
+![Tela principal](public/tela-principal.jpeg)
 
 ### Infográficos salvos
-![Infográficos salvos](public/Infogr%C3%A1ficos%20salvos.jpeg)
+![Infográficos salvos](public/infograficos-salvos.jpeg)
 
 ### Perfil / Conta
-![Perfil](public/Profile.jpeg)
+![Perfil](public/perfil-conta.jpeg)
 
 ## 🔐 Autenticação e Controle de Acesso
 
