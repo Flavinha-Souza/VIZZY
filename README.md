@@ -30,6 +30,17 @@ Aplicação web para criação de infográficos interativos, com edição em tem
 - Animações suaves de transição entre login, cadastro e redefinição
 - Feedback visual de validação de campos e estados de erro
 
+## 📸 Screenshots
+
+### Tela principal
+![Tela principal](public/Tela%20principal.jpeg)
+
+### Infográficos salvos
+![Infográficos salvos](public/Infogr%C3%A1ficos%20salvos.jpeg)
+
+### Perfil / Conta
+![Perfil](public/Profile.jpeg)
+
 ## 🔐 Autenticação e Controle de Acesso
 
 - Autenticação local via `localStorage`
