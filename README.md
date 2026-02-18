@@ -41,9 +41,9 @@ Aplicação web para criação de infográficos interativos, com edição em tem
 
 ### Mobile
 <p>
-  <img src="public/tela-inicial-mobile.jpeg" alt="Tela inicial mobile" width="210" />
-  <img src="public/login-mobile.jpeg" alt="Login mobile" width="210" />
-  <img src="public/editar-dados-mobile.jpeg" alt="Editar dados mobile" width="210" />
+  <img src="public/tela-inicial-mobile.jpeg" alt="Tela inicial mobile" width="105" />
+  <img src="public/login-mobile.jpeg" alt="Login mobile" width="105" />
+  <img src="public/editar-dados-mobile.jpeg" alt="Editar dados mobile" width="105" />
 </p>
 
 ## 🔐 Autenticação e Controle de Acesso
