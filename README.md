@@ -32,14 +32,17 @@ Aplicação web para criação de infográficos interativos, com edição em tem
 
 ## 📸 Screenshots
 
-### Tela principal
-<img src="public/tela-principal.jpeg" alt="Tela principal" width="720" />
+### Desktop
+<img src="public/tela-principal.jpeg" alt="Tela principal desktop" width="680" />
+<br />
+<img src="public/infograficos-salvos.jpeg" alt="Infográficos salvos desktop" width="680" />
+<br />
+<img src="public/perfil-conta.jpeg" alt="Perfil da conta desktop" width="680" />
 
-### Infográficos salvos
-<img src="public/infograficos-salvos.jpeg" alt="Infográficos salvos" width="720" />
-
-### Perfil / Conta
-<img src="public/perfil-conta.jpeg" alt="Perfil / Conta" width="720" />
+### Mobile
+<img src="public/tela-inicial-mobile.jpeg" alt="Tela inicial mobile" width="300" />
+<img src="public/login-mobile.jpeg" alt="Login mobile" width="300" />
+<img src="public/editar-dados-mobile.jpeg" alt="Editar dados mobile" width="300" />
 
 ## 🔐 Autenticação e Controle de Acesso
 
