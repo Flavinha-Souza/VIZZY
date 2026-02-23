@@ -7,24 +7,25 @@ import { ChartType, SavedInfographic } from "@/types/infographic";
 
 interface Props {
   open: boolean;
+  userEmail: string | null;
   onClose: () => void;
   onSelect: (item: SavedInfographic) => void;
 }
 
-const SavedInfographicsModal = ({ open, onClose, onSelect }: Props) => {
+const SavedInfographicsModal = ({ open, userEmail, onClose, onSelect }: Props) => {
   const [saved, setSaved] = useState<SavedInfographic[]>([]);
 
   useEffect(() => {
     if (open) {
-      const data = getSavedInfographics();
+      const data = getSavedInfographics(userEmail);
       setSaved([...data].reverse());
     }
-  }, [open]);
+  }, [open, userEmail]);
 
   const deleteItem = (id: number) => {
     const updated = saved.filter((item) => item.id !== id);
     setSaved(updated);
-    saveSavedInfographics(updated);
+    saveSavedInfographics(updated, userEmail);
 
     toast.success("Infográfico removido", {
       duration: 2000,

@@ -1,9 +1,10 @@
-﻿import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Eye, EyeOff, X } from "lucide-react";
 import { toast } from "sonner";
 import { getUsers, saveSession, saveUsers } from "@/lib/storage";
 import { AuthSession, AuthUser } from "@/types/auth";
+import { hashPassword, isStrongPassword, verifyUserPassword } from "@/lib/auth";
 
 interface AuthModalProps {
   open: boolean;
@@ -12,35 +13,9 @@ interface AuthModalProps {
 }
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const MIN_PASSWORD_LENGTH = 6;
-
-const toHex = (bytes: Uint8Array) =>
-  Array.from(bytes)
-    .map((byte) => byte.toString(16).padStart(2, "0"))
-    .join("");
-
-const hashPassword = async (rawPassword: string) => {
-  if (!globalThis.crypto?.subtle) {
-    let hash = 0;
-    for (let i = 0; i < rawPassword.length; i += 1) {
-      hash = (hash << 5) - hash + rawPassword.charCodeAt(i);
-      hash |= 0;
-    }
-    return `fallback:${Math.abs(hash).toString(16)}`;
-  }
-
-  const encoder = new TextEncoder();
-  const data = encoder.encode(rawPassword);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  return `sha256:${toHex(new Uint8Array(hashBuffer))}`;
-};
-
-const isStrongPassword = (rawPassword: string) => {
-  return rawPassword.length >= MIN_PASSWORD_LENGTH;
-};
 
 const AuthModal = ({ open, onClose, onAuthenticated }: AuthModalProps) => {
-  const [mode, setMode] = useState<"login" | "register" | "reset">("login");
+  const [mode, setMode] = useState<"login" | "register">("login");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -53,7 +28,6 @@ const AuthModal = ({ open, onClose, onAuthenticated }: AuthModalProps) => {
   }>({});
 
   const isRegister = useMemo(() => mode === "register", [mode]);
-  const isReset = useMemo(() => mode === "reset", [mode]);
 
   useEffect(() => {
     if (!open) return;
@@ -80,7 +54,7 @@ const AuthModal = ({ open, onClose, onAuthenticated }: AuthModalProps) => {
     onClose();
   };
 
-  const validateFields = (isRegisterMode: boolean, isResetMode: boolean) => {
+  const validateFields = (isRegisterMode: boolean) => {
     const nextErrors: {
       name?: string;
       email?: string;
@@ -95,13 +69,13 @@ const AuthModal = ({ open, onClose, onAuthenticated }: AuthModalProps) => {
     if (!normalizedEmail) {
       nextErrors.email = "Informe um e-mail.";
     } else if (!EMAIL_PATTERN.test(normalizedEmail)) {
-      nextErrors.email = "Informe um e-mail v\u00E1lido.";
+      nextErrors.email = "Informe um e-mail valido.";
     }
 
     if (!password.trim()) {
       nextErrors.password = "Informe uma senha.";
-    } else if ((isRegisterMode || isResetMode) && !isStrongPassword(password.trim())) {
-      nextErrors.password = "M\u00EDnimo 6 caracteres.";
+    } else if (isRegisterMode && !isStrongPassword(password.trim())) {
+      nextErrors.password = "Minimo 6 caracteres.";
     }
 
     return nextErrors;
@@ -114,7 +88,7 @@ const AuthModal = ({ open, onClose, onAuthenticated }: AuthModalProps) => {
     const normalizedEmail = email.trim().toLowerCase();
     const rawPassword = password.trim();
 
-    const fieldErrors = validateFields(isRegister, isReset);
+    const fieldErrors = validateFields(isRegister);
     setErrors(fieldErrors);
     if (Object.keys(fieldErrors).length > 0) {
       toast.error("Revise os campos destacados.");
@@ -125,34 +99,11 @@ const AuthModal = ({ open, onClose, onAuthenticated }: AuthModalProps) => {
     setSubmitting(true);
 
     try {
-      if (isReset) {
-        const user = users.find((item) => item.email === normalizedEmail);
-        if (!user) {
-          setErrors((prev) => ({ ...prev, email: "E-mail n\u00E3o encontrado." }));
-          toast.error("E-mail n\u00E3o encontrado.");
-          return;
-        }
-
-        const passwordHash = await hashPassword(rawPassword);
-        const updatedUsers = users.map((item) =>
-          item.email === user.email
-            ? { ...item, passwordHash, passwordLegacy: undefined, password: undefined }
-            : item,
-        );
-        saveUsers(updatedUsers);
-        setPassword("");
-        setShowPassword(false);
-        setErrors({});
-        setMode("login");
-        toast.success("Senha redefinida. Fa\u00E7a login com a nova senha.");
-        return;
-      }
-
       if (isRegister) {
         const existing = users.find((user) => user.email === normalizedEmail);
         if (existing) {
-          setErrors((prev) => ({ ...prev, email: "Este e-mail j\u00E1 est\u00E1 cadastrado." }));
-          toast.error("Este e-mail j\u00E1 est\u00E1 cadastrado.");
+          setErrors((prev) => ({ ...prev, email: "Este e-mail ja esta cadastrado." }));
+          toast.error("Este e-mail ja esta cadastrado.");
           return;
         }
 
@@ -179,29 +130,25 @@ const AuthModal = ({ open, onClose, onAuthenticated }: AuthModalProps) => {
 
       const user = users.find((item) => item.email === normalizedEmail);
       if (!user) {
-        setErrors((prev) => ({ ...prev, email: "E-mail ou senha inv\u00E1lidos." }));
-        toast.error("E-mail ou senha inv\u00E1lidos.");
+        setErrors((prev) => ({ ...prev, email: "E-mail ou senha invalidos." }));
+        toast.error("E-mail ou senha invalidos.");
         return;
       }
 
-      const incomingHash = await hashPassword(rawPassword);
-      const isHashedMatch = user.passwordHash === incomingHash;
-      const isLegacyMatch =
-        (typeof user.passwordLegacy === "string" && user.passwordLegacy === rawPassword) ||
-        (typeof user.password === "string" && user.password === rawPassword);
-
-      if (!isHashedMatch && !isLegacyMatch) {
-        setErrors((prev) => ({ ...prev, password: "E-mail ou senha inv\u00E1lidos." }));
-        toast.error("E-mail ou senha inv\u00E1lidos.");
+      const passwordValidation = await verifyUserPassword(user, rawPassword);
+      if (!passwordValidation.isValid) {
+        setErrors((prev) => ({ ...prev, password: "E-mail ou senha invalidos." }));
+        toast.error("E-mail ou senha invalidos.");
         return;
       }
 
-      if (isLegacyMatch) {
+      if (passwordValidation.shouldUpgradeHash) {
+        const upgradedHash = await hashPassword(rawPassword);
         const migratedUsers = users.map((item) =>
           item.email === user.email
             ? {
                 ...item,
-                passwordHash: incomingHash,
+                passwordHash: upgradedHash,
                 passwordLegacy: undefined,
                 password: undefined,
               }
@@ -220,7 +167,7 @@ const AuthModal = ({ open, onClose, onAuthenticated }: AuthModalProps) => {
       onAuthenticated(session);
       closeModal();
     } catch {
-      toast.error("N\u00E3o foi poss\u00EDvel concluir a opera\u00E7\u00E3o. Tente novamente.");
+      toast.error("Nao foi possivel concluir a operacao. Tente novamente.");
     } finally {
       setSubmitting(false);
     }
@@ -253,12 +200,12 @@ const AuthModal = ({ open, onClose, onAuthenticated }: AuthModalProps) => {
             <div className="pointer-events-auto w-full max-h-[90dvh] overflow-y-auto rounded-[20px] border border-slate-700/30 bg-[#040b1a] px-4 py-5 text-slate-100 md:max-w-[460px] md:px-6 md:py-6">
               <div className="mb-5 flex items-start justify-between md:mb-6">
                 <h2 className="text-[22px] leading-none tracking-[0.08em] text-slate-100 md:text-[28px]">
-                  {isRegister ? "CRIAR CONTA" : isReset ? "REDEFINIR SENHA" : "ENTRAR"}
+                  {isRegister ? "CRIAR CONTA" : "ENTRAR"}
                 </h2>
                 <button
                   onClick={closeModal}
                   className="rounded-md p-2 text-slate-400 transition hover:text-slate-200"
-                  aria-label="Fechar modal de autentica\u00E7\u00E3o"
+                  aria-label="Fechar modal de autenticacao"
                 >
                   <X size={24} strokeWidth={1.5} />
                 </button>
@@ -340,13 +287,13 @@ const AuthModal = ({ open, onClose, onAuthenticated }: AuthModalProps) => {
                             setErrors((prev) => ({ ...prev, password: undefined }));
                           }
                         }}
-                        placeholder={isRegister || isReset ? "Crie uma nova senha" : "Sua senha"}
+                        placeholder={isRegister ? "Crie uma senha" : "Sua senha"}
                         className={`${inputClass(!!errors.password)} pr-14`}
                         aria-invalid={!!errors.password}
                         aria-describedby={
                           errors.password
                             ? "auth-password-error"
-                            : isRegister || isReset
+                            : isRegister
                               ? "auth-password-hint"
                               : undefined
                         }
@@ -361,9 +308,9 @@ const AuthModal = ({ open, onClose, onAuthenticated }: AuthModalProps) => {
                         {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
                       </button>
                     </div>
-                    {(isRegister || isReset) && !errors.password && (
+                    {isRegister && !errors.password && (
                       <p id="auth-password-hint" className="text-[12px] text-slate-400">
-                        {"M\u00EDnimo 6 caracteres."}
+                        Minimo 6 caracteres.
                       </p>
                     )}
                     {errors.password && (
@@ -378,70 +325,34 @@ const AuthModal = ({ open, onClose, onAuthenticated }: AuthModalProps) => {
                     disabled={submitting}
                     className="mt-1 w-full rounded-[14px] bg-[#38d7cd] px-6 py-3 text-[16px] font-medium text-[#061223] transition duration-200 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-70 md:text-[17px]"
                   >
-                    {submitting
-                      ? "Processando..."
-                      : isRegister
-                        ? "Criar e entrar"
-                        : isReset
-                          ? "Redefinir senha"
-                          : "Entrar"}
+                    {submitting ? "Processando..." : isRegister ? "Criar e entrar" : "Entrar"}
                   </button>
                 </motion.form>
               </AnimatePresence>
 
               <div className="mt-5 border-t border-slate-600/55 pt-4 md:mt-6">
-                {!isRegister && !isReset && (
-                  <button
-                    type="button"
-                    className="block text-[14px] text-[#38d7cd] transition hover:opacity-90 md:text-[15px]"
-                    onClick={() => {
-                      setMode("reset");
-                      setPassword("");
-                      setShowPassword(false);
-                      setErrors({});
-                    }}
-                  >
-                    Esqueci minha senha
-                  </button>
-                )}
+                <button
+                  onClick={() => {
+                    setMode(isRegister ? "login" : "register");
+                    setPassword("");
+                    setShowPassword(false);
+                    setErrors({});
+                  }}
+                  className={`block text-left text-[14px] text-[#38d7cd] underline underline-offset-4 transition hover:opacity-90 md:text-[15px] ${
+                    isRegister ? "mt-0" : "mt-4"
+                  }`}
+                >
+                  {isRegister ? "Ja tem conta? Entrar" : "Ainda nao tem conta? Criar cadastro"}
+                </button>
 
-                {!isReset && (
-                  <button
-                    onClick={() => {
-                      setMode(isRegister ? "login" : "register");
-                      setPassword("");
-                      setShowPassword(false);
-                      setErrors({});
-                    }}
-                    className={`block text-left text-[14px] text-[#38d7cd] underline underline-offset-4 transition hover:opacity-90 md:text-[15px] ${
-                      isRegister ? "mt-0" : "mt-4"
-                    }`}
-                  >
-                    {isRegister
-                      ? "J\u00E1 tem conta? Entrar"
-                      : "Ainda n\u00E3o tem conta? Criar cadastro"}
-                  </button>
-                )}
-
-                {isReset && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMode("login");
-                      setPassword("");
-                      setShowPassword(false);
-                      setErrors({});
-                    }}
-                    className="mt-4 block text-left text-[14px] text-[#38d7cd] underline underline-offset-4 transition hover:opacity-90 md:text-[15px]"
-                  >
-                    Voltar para login
-                  </button>
+                {!isRegister && (
+                  <p className="mt-3 text-[12px] text-slate-400 md:text-[13px]">
+                    Troca de senha disponivel em Minha Conta apos login.
+                  </p>
                 )}
 
                 <p className="mt-5 max-w-[420px] text-[12px] leading-relaxed text-slate-400 md:text-[13px]">
-                  {
-                    "Ao continuar, voc\u00EA concorda com os Termos de Uso e a Pol\u00EDtica de Privacidade."
-                  }
+                  Ao continuar, voce concorda com os Termos de Uso e a Politica de Privacidade.
                 </p>
               </div>
             </div>
@@ -453,6 +364,3 @@ const AuthModal = ({ open, onClose, onAuthenticated }: AuthModalProps) => {
 };
 
 export default AuthModal;
-
-
-

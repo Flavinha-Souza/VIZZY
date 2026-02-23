@@ -39,11 +39,3 @@ export const CHART_COLORS_KEYS = [
   'var(--chart-4)',
   'var(--chart-5)',
 ];
-
-export const SAMPLE_DATA: DataRow[] = [
-  { label: 'Marketing', value: 42 },
-  { label: 'Vendas', value: 78 },
-  { label: 'Tecnologia', value: 95 },
-  { label: 'Design', value: 63 },
-  { label: 'Suporte', value: 51 },
-];

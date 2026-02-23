@@ -1,29 +1,39 @@
-﻿import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Save, Folder, User } from 'lucide-react';
-import DataInput from '@/components/infographic/DataInput';
-import ChartTypeSelector from '@/components/infographic/ChartTypeSelector';
-import ChartPreview from '@/components/infographic/ChartPreview';
-import SavedInfographicsModal from '@/components/infographic/SavedInfographicsModal';
-import AuthModal from '@/components/auth/AuthModal';
-import AccountModal from '@/components/auth/AccountModal';
-import { getSavedInfographics, getSession, saveSavedInfographics } from '@/lib/storage';
-import { AuthSession } from '@/types/auth';
-import { ChartType, DataRow, SAMPLE_DATA, SavedInfographic } from '@/types/infographic';
-import { toast } from 'sonner';
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { ChevronLeft, ChevronRight, Save, Folder, User } from "lucide-react";
+import DataInput from "@/components/infographic/DataInput";
+import ChartTypeSelector from "@/components/infographic/ChartTypeSelector";
+import ChartPreview from "@/components/infographic/ChartPreview";
+import SavedInfographicsModal from "@/components/infographic/SavedInfographicsModal";
+import AuthModal from "@/components/auth/AuthModal";
+import AccountModal from "@/components/auth/AccountModal";
+import {
+  clearLegacyGlobalSaved,
+  getSavedInfographics,
+  getSession,
+  mergeGuestSavedIntoUser,
+  saveSavedInfographics,
+} from "@/lib/storage";
+import { AuthSession } from "@/types/auth";
+import { ChartType, DataRow, SavedInfographic } from "@/types/infographic";
+import { toast } from "sonner";
 
 const Index = () => {
-  const [data, setData] = useState<DataRow[]>(SAMPLE_DATA);
-  const [chartType, setChartType] = useState<ChartType>('bar');
-  const [title, setTitle] = useState('Desempenho por Departamento');
+  const [data, setData] = useState<DataRow[]>([]);
+  const [chartType, setChartType] = useState<ChartType>("bar");
+  const [title, setTitle] = useState("Meu Infografico");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [savedOpen, setSavedOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [session, setSession] = useState<AuthSession | null>(() => getSession());
 
+  useEffect(() => {
+    clearLegacyGlobalSaved();
+  }, []);
+
   const saveInfographic = () => {
-    const saved = getSavedInfographics();
+    const saved = getSavedInfographics(session?.email);
 
     const newItem: SavedInfographic = {
       id: Date.now(),
@@ -33,9 +43,9 @@ const Index = () => {
       createdAt: new Date().toISOString(),
     };
 
-    saveSavedInfographics([...saved, newItem]);
+    saveSavedInfographics([...saved, newItem], session?.email);
 
-    toast.success('Infográfico salvo com sucesso');
+    toast.success("Infografico salvo com sucesso");
   };
 
   const openSavedProjects = () => {
@@ -53,11 +63,7 @@ const Index = () => {
         <div className="flex items-center justify-between px-3 md:px-6 h-14">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 flex items-center justify-center">
-              <img
-                src="/Logo azul 2.png"
-                alt="Vizzy Logo"
-                className="h-8 w-auto object-contain"
-              />
+              <img src="/Logo azul 2.png" alt="Vizzy Logo" className="h-8 w-auto object-contain" />
             </div>
             <div>
               <h1 className="text-sm font-bold text-foreground tracking-tight">VIZZY</h1>
@@ -105,7 +111,7 @@ const Index = () => {
               "
             >
               <Folder size={14} />
-              <span className="hidden sm:inline">Meus Infográficos</span>
+              <span className="hidden sm:inline">Meus Infograficos</span>
               <span className="sm:hidden">Salvos</span>
             </button>
 
@@ -139,18 +145,13 @@ const Index = () => {
             width: sidebarOpen ? 340 : 0,
             opacity: sidebarOpen ? 1 : 0,
           }}
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
           className="hidden md:block border-r border-border/50 bg-background/50 overflow-hidden flex-shrink-0"
         >
           <div className="w-[340px] h-full overflow-y-auto p-4 space-y-6">
             <ChartTypeSelector selected={chartType} onSelect={setChartType} />
             <div className="h-px bg-border/50" />
-            <DataInput
-              data={data}
-              onDataChange={setData}
-              title={title}
-              onTitleChange={setTitle}
-            />
+            <DataInput data={data} onDataChange={setData} title={title} onTitleChange={setTitle} />
           </div>
         </motion.aside>
 
@@ -192,6 +193,7 @@ const Index = () => {
 
       <SavedInfographicsModal
         open={savedOpen}
+        userEmail={session?.email || null}
         onClose={() => setSavedOpen(false)}
         onSelect={(item) => {
           setTitle(item.title);
@@ -204,6 +206,7 @@ const Index = () => {
         open={authOpen}
         onClose={() => setAuthOpen(false)}
         onAuthenticated={(newSession) => {
+          mergeGuestSavedIntoUser(newSession.email);
           setSession(newSession);
           setAuthOpen(false);
           setSavedOpen(true);

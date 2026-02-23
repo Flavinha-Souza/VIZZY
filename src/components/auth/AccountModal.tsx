@@ -1,9 +1,17 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Trash2, LogOut, X } from "lucide-react";
+import { Trash2, LogOut, X, KeyRound } from "lucide-react";
 import { toast } from "sonner";
-import { clearSession, getUsers, saveSession, saveUsers } from "@/lib/storage";
+import {
+  clearSavedInfographicsByEmail,
+  clearSession,
+  getUsers,
+  migrateSavedInfographicsByEmail,
+  saveSession,
+  saveUsers,
+} from "@/lib/storage";
 import { AuthSession } from "@/types/auth";
+import { hashPassword, isStrongPassword, verifyUserPassword } from "@/lib/auth";
 
 interface AccountModalProps {
   open: boolean;
@@ -12,19 +20,22 @@ interface AccountModalProps {
   onSessionChange: (session: AuthSession | null) => void;
 }
 
-const AccountModal = ({
-  open,
-  session,
-  onClose,
-  onSessionChange,
-}: AccountModalProps) => {
+const AccountModal = ({ open, session, onClose, onSessionChange }: AccountModalProps) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [changingPassword, setChangingPassword] = useState(false);
 
   useEffect(() => {
     if (!open || !session) return;
     setName(session.name);
     setEmail(session.email);
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setChangingPassword(false);
   }, [open, session]);
 
   const handleSave = () => {
@@ -44,17 +55,16 @@ const AccountModal = ({
     );
 
     if (duplicated) {
-      toast.error("Este email já está em uso.");
+      toast.error("Este email ja esta em uso.");
       return;
     }
 
     const updatedUsers = users.map((user) =>
-      user.email === session.email
-        ? { ...user, name: trimmedName, email: normalizedEmail }
-        : user,
+      user.email === session.email ? { ...user, name: trimmedName, email: normalizedEmail } : user,
     );
 
     saveUsers(updatedUsers);
+    migrateSavedInfographicsByEmail(session.email, normalizedEmail);
 
     const nextSession: AuthSession = { name: trimmedName, email: normalizedEmail };
     saveSession(nextSession);
@@ -64,24 +74,92 @@ const AccountModal = ({
     onClose();
   };
 
+  const handleChangePassword = async () => {
+    if (!session || changingPassword) return;
+
+    const rawCurrent = currentPassword.trim();
+    const rawNew = newPassword.trim();
+    const rawConfirm = confirmPassword.trim();
+
+    if (!rawCurrent || !rawNew || !rawConfirm) {
+      toast.error("Preencha todos os campos de senha.");
+      return;
+    }
+
+    if (!isStrongPassword(rawNew)) {
+      toast.error("A nova senha precisa ter no minimo 6 caracteres.");
+      return;
+    }
+
+    if (rawNew !== rawConfirm) {
+      toast.error("A confirmacao da senha nao confere.");
+      return;
+    }
+
+    if (rawCurrent === rawNew) {
+      toast.error("A nova senha precisa ser diferente da atual.");
+      return;
+    }
+
+    setChangingPassword(true);
+
+    try {
+      const users = getUsers();
+      const currentUser = users.find((user) => user.email === session.email);
+      if (!currentUser) {
+        toast.error("Conta nao encontrada.");
+        return;
+      }
+
+      const passwordValidation = await verifyUserPassword(currentUser, rawCurrent);
+      if (!passwordValidation.isValid) {
+        toast.error("Senha atual invalida.");
+        return;
+      }
+
+      const nextHash = await hashPassword(rawNew);
+      const updatedUsers = users.map((user) =>
+        user.email === session.email
+          ? {
+              ...user,
+              passwordHash: nextHash,
+              passwordLegacy: undefined,
+              password: undefined,
+            }
+          : user,
+      );
+
+      saveUsers(updatedUsers);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      toast.success("Senha atualizada com sucesso.");
+    } catch {
+      toast.error("Nao foi possivel trocar a senha agora.");
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+
   const handleLogout = () => {
     clearSession();
     onSessionChange(null);
-    toast.success("Você saiu da conta.");
+    toast.success("Voce saiu da conta.");
     onClose();
   };
 
   const handleDeleteAccount = () => {
     if (!session) return;
-    const confirmed = window.confirm("Deseja excluir sua conta? Esta ação não pode ser desfeita.");
+    const confirmed = window.confirm("Deseja excluir sua conta? Esta acao nao pode ser desfeita.");
     if (!confirmed) return;
 
     const users = getUsers().filter((user) => user.email !== session.email);
     saveUsers(users);
+    clearSavedInfographicsByEmail(session.email);
     clearSession();
     onSessionChange(null);
 
-    toast.success("Conta excluída.");
+    toast.success("Conta excluida.");
     onClose();
   };
 
@@ -136,8 +214,43 @@ const AccountModal = ({
                   onClick={handleSave}
                   className="w-full rounded-lg bg-primary px-3 py-2.5 text-xs font-mono text-primary-foreground transition hover:opacity-90"
                 >
-                  Salvar alterações
+                  Salvar alteracoes
                 </button>
+
+                <div className="rounded-lg border border-border p-3 space-y-2.5">
+                  <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground inline-flex items-center gap-2">
+                    <KeyRound size={12} />
+                    Trocar senha
+                  </p>
+                  <input
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    placeholder="Senha atual"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-primary/60"
+                  />
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Nova senha"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-primary/60"
+                  />
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirmar nova senha"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-primary/60"
+                  />
+                  <button
+                    onClick={handleChangePassword}
+                    disabled={changingPassword}
+                    className="w-full rounded-lg border border-primary/45 px-3 py-2.5 text-xs font-mono text-primary transition hover:bg-primary/10 disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {changingPassword ? "Atualizando..." : "Atualizar senha"}
+                  </button>
+                </div>
 
                 <button
                   onClick={handleLogout}
