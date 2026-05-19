@@ -21,7 +21,7 @@ import { toast } from "sonner";
 const Index = () => {
   const [data, setData] = useState<DataRow[]>([]);
   const [chartType, setChartType] = useState<ChartType>("bar");
-  const [title, setTitle] = useState("Meu Infografico");
+  const [title, setTitle] = useState("Meu Infográfico");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [savedOpen, setSavedOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
@@ -45,7 +45,7 @@ const Index = () => {
 
     saveSavedInfographics([...saved, newItem], session?.email);
 
-    toast.success("Infografico salvo com sucesso");
+    toast.success("Infográfico salvo com sucesso");
   };
 
   const openSavedProjects = () => {
